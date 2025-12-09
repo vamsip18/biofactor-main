@@ -118,16 +118,16 @@ export const HRDashboard: React.FC = () => {
             Track attendance, payroll, recruitment, and employee management
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <button 
             onClick={() => navigate('/hr/recruitment')}
-            className="px-4 py-2 rounded-lg border border-border bg-card text-sm font-medium hover:bg-muted transition-colors"
+            className="px-3 sm:px-4 py-2 rounded-lg border border-primary/30 bg-primary/5 text-xs sm:text-sm font-medium text-primary hover:bg-primary/10 transition-colors whitespace-nowrap"
           >
             View Reports
           </button>
           <button 
             onClick={() => navigate('/admin/users')}
-            className="px-4 py-2 rounded-lg bg-department-hr text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+            className="px-3 sm:px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
           >
             Add Employee
           </button>

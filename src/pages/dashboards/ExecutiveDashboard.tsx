@@ -52,6 +52,33 @@ const topProducts = [
 
 export const ExecutiveDashboard: React.FC = () => {
   const navigate = useNavigate();
+
+  const handleExportReport = () => {
+    // Generate CSV export
+    const headers = ['KPI', 'Value', 'Change', 'Status'];
+    const data = [
+      ['Total Revenue (MTD)', '₹4.2 Cr', '+12.5%', 'Active'],
+      ['Orders Processed', '1,847', '+8.3%', 'Active'],
+      ['Production Batches', '156', '-2.1%', 'Active'],
+      ['Active Employees', '342', '+3.2%', 'Active'],
+    ];
+    
+    const csv = [
+      headers.join(','),
+      ...data.map(row => row.join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `executive-dashboard-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
@@ -71,7 +98,13 @@ export const ExecutiveDashboard: React.FC = () => {
             <option>This Quarter</option>
             <option>This Year</option>
           </select>
-          <button className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+          <button
+            onClick={handleExportReport}
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
             Export Report
           </button>
         </div>
@@ -116,14 +149,14 @@ export const ExecutiveDashboard: React.FC = () => {
       {/* Department KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
         {[
-          { label: 'Sales Target', value: '87%', icon: TrendingUp, color: 'bg-department-sales' },
-          { label: 'Production', value: '92%', icon: Factory, color: 'bg-department-manufacturing' },
-          { label: 'QC Pass Rate', value: '96%', icon: FlaskConical, color: 'bg-department-qc' },
-          { label: 'Stock Health', value: '78%', icon: Warehouse, color: 'bg-department-warehouse' },
-          { label: 'Cash Flow', value: '+₹1.2Cr', icon: DollarSign, color: 'bg-department-finance' },
-          { label: 'Attendance', value: '94%', icon: Users, color: 'bg-department-hr' },
-          { label: 'Field Coverage', value: '72%', icon: MapPin, color: 'bg-department-fieldops' },
-          { label: 'R&D Pipeline', value: '8 Active', icon: Microscope, color: 'bg-department-rnd' },
+          { label: 'Sales Target', value: '87%', icon: TrendingUp, color: 'bg-primary' },
+          { label: 'Production', value: '92%', icon: Factory, color: 'bg-primary' },
+          { label: 'QC Pass Rate', value: '96%', icon: FlaskConical, color: 'bg-primary' },
+          { label: 'Stock Health', value: '78%', icon: Warehouse, color: 'bg-primary' },
+          { label: 'Cash Flow', value: '+₹1.2Cr', icon: DollarSign, color: 'bg-primary' },
+          { label: 'Attendance', value: '94%', icon: Users, color: 'bg-primary' },
+          { label: 'Field Coverage', value: '72%', icon: MapPin, color: 'bg-primary' },
+          { label: 'R&D Pipeline', value: '8 Active', icon: Microscope, color: 'bg-primary' },
         ].map((item) => (
           <div key={item.label} className="bg-card rounded-lg p-3 border border-border/50">
             <div className={`w-8 h-8 rounded-lg ${item.color} flex items-center justify-center mb-2`}>
@@ -238,9 +271,9 @@ export const ExecutiveDashboard: React.FC = () => {
             <button
               key={action.label}
               onClick={() => navigate(action.path)}
-              className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border hover:bg-muted/50 hover:border-accent hover:shadow-md transition-all duration-200"
+              className="flex flex-col items-center gap-2 p-4 rounded-lg border border-primary/30 hover:bg-primary/5 hover:border-primary hover:shadow-md transition-all duration-200"
             >
-              <action.icon className="w-6 h-6 text-accent" />
+              <action.icon className="w-6 h-6 text-primary" />
               <span className="text-sm text-center text-foreground font-medium">
                 {action.label}
               </span>

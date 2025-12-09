@@ -81,20 +81,20 @@ export const WarehouseDashboard: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground break-words">
             Warehouse & Logistics Dashboard
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm md:text-base text-muted-foreground mt-1">
             Monitor inventory levels, stock movements, and dispatch status
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <select 
             value={selectedFilter}
             onChange={(e) => setSelectedFilter(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="px-3 sm:px-4 py-2 rounded-lg border border-primary/20 bg-card text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary hover:border-primary transition-colors"
           >
             <option value="all">All Warehouses</option>
             <option value="main">Main Warehouse</option>
@@ -103,7 +103,7 @@ export const WarehouseDashboard: React.FC = () => {
           </select>
           <button 
             onClick={() => navigate('/warehouse/inventory')}
-            className="px-4 py-2 rounded-lg bg-department-warehouse text-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+            className="px-3 sm:px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
           >
             New Inward
           </button>

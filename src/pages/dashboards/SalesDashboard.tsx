@@ -182,7 +182,7 @@ export const SalesDashboard: React.FC = () => {
           </select>
           <button 
             onClick={() => navigate('/sales/orders')}
-            className="px-4 py-2 rounded-lg bg-department-sales text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             New Order
           </button>

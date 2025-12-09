@@ -87,7 +87,7 @@ export const FieldOpsDashboard: React.FC = () => {
           </select>
           <button 
             onClick={() => navigate('/fieldops/visits')}
-            className="px-4 py-2 rounded-lg bg-department-fieldops text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             Log Visit
           </button>

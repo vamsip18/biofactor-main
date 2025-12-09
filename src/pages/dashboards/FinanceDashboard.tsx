@@ -151,20 +151,20 @@ export const FinanceDashboard: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground break-words">
             Finance & Accounts Dashboard
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm md:text-base text-muted-foreground mt-1">
             Track cash flow, receivables, invoices, and financial performance
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <select 
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="px-3 sm:px-4 py-2 rounded-lg border border-primary/20 bg-card text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary hover:border-primary transition-colors"
           >
             <option value="month">This Month</option>
             <option value="lastMonth">Last Month</option>
@@ -173,7 +173,7 @@ export const FinanceDashboard: React.FC = () => {
           </select>
           <button 
             onClick={() => navigate('/finance/reports')}
-            className="px-4 py-2 rounded-lg bg-department-finance text-accent-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+            className="px-3 sm:px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
           >
             Export Report
           </button>

@@ -90,7 +90,7 @@ export const RnDDashboard: React.FC = () => {
           </button>
           <button 
             onClick={() => navigate('/rnd/trials')}
-            className="px-4 py-2 rounded-lg bg-department-rnd text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             New Trial
           </button>
@@ -224,7 +224,7 @@ export const RnDDashboard: React.FC = () => {
               <div className="flex items-center gap-2">
                 <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-department-rnd rounded-full"
+                    className="h-full bg-primary rounded-full"
                     style={{ width: `${value}%` }}
                   />
                 </div>

@@ -56,20 +56,20 @@ export const ManufacturingDashboard: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground break-words">
             Manufacturing Dashboard
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm md:text-base text-muted-foreground mt-1">
             Monitor production plans, batch tracking, and machine health
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <select 
             value={selectedFilter}
             onChange={(e) => setSelectedFilter(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="px-3 sm:px-4 py-2 rounded-lg border border-primary/20 bg-card text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary hover:border-primary transition-colors"
           >
             <option value="all">All Batches</option>
             <option value="completed">Completed</option>
@@ -79,13 +79,13 @@ export const ManufacturingDashboard: React.FC = () => {
           </select>
           <button 
             onClick={() => navigate('/manufacturing/batches')}
-            className="px-4 py-2 rounded-lg border border-border bg-card text-sm font-medium hover:bg-muted transition-colors"
+            className="px-3 sm:px-4 py-2 rounded-lg border border-primary/30 bg-primary/5 text-xs sm:text-sm font-medium text-primary hover:bg-primary/10 transition-colors whitespace-nowrap"
           >
             View Schedule
           </button>
           <button 
             onClick={() => navigate('/manufacturing/batches')}
-            className="px-4 py-2 rounded-lg bg-department-manufacturing text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+            className="px-3 sm:px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
           >
             New Batch
           </button>
@@ -93,7 +93,7 @@ export const ManufacturingDashboard: React.FC = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <KPICard
           title="Production Today"
           value="748 units"
@@ -129,31 +129,31 @@ export const ManufacturingDashboard: React.FC = () => {
       </div>
 
       {/* Status Cards Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-success/10 border border-success/20 rounded-lg p-4">
-          <CheckCircle className="w-5 h-5 text-success mb-2" />
-          <p className="text-2xl font-bold text-foreground">45</p>
-          <p className="text-sm text-muted-foreground">Batches Completed</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+        <div className="bg-primary/5 border border-primary/30 rounded-lg p-3 md:p-4 hover:bg-primary/10 transition-colors">
+          <CheckCircle className="w-5 h-5 text-primary mb-2" />
+          <p className="text-xl md:text-2xl font-bold text-foreground">45</p>
+          <p className="text-xs md:text-sm text-muted-foreground">Completed</p>
         </div>
-        <div className="bg-info/10 border border-info/20 rounded-lg p-4">
+        <div className="bg-info/10 border border-info/20 rounded-lg p-3 md:p-4">
           <Factory className="w-5 h-5 text-info mb-2" />
-          <p className="text-2xl font-bold text-foreground">28</p>
-          <p className="text-sm text-muted-foreground">In Progress</p>
+          <p className="text-xl md:text-2xl font-bold text-foreground">28</p>
+          <p className="text-xs md:text-sm text-muted-foreground">In Progress</p>
         </div>
-        <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
+        <div className="bg-warning/10 border border-warning/20 rounded-lg p-3 md:p-4">
           <Clock className="w-5 h-5 text-warning mb-2" />
-          <p className="text-2xl font-bold text-foreground">15</p>
-          <p className="text-sm text-muted-foreground">QC Pending</p>
+          <p className="text-xl md:text-2xl font-bold text-foreground">15</p>
+          <p className="text-xs md:text-sm text-muted-foreground">QC Pending</p>
         </div>
-        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 md:p-4">
           <AlertTriangle className="w-5 h-5 text-destructive mb-2" />
-          <p className="text-2xl font-bold text-foreground">12</p>
-          <p className="text-sm text-muted-foreground">On Hold</p>
+          <p className="text-xl md:text-2xl font-bold text-foreground">12</p>
+          <p className="text-xs md:text-sm text-muted-foreground">On Hold</p>
         </div>
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <ChartCard
           title="Production Plan vs Actual"
           subtitle="Daily output this week"
@@ -162,7 +162,7 @@ export const ManufacturingDashboard: React.FC = () => {
           xAxisKey="name"
           dataKeys={[
             { key: 'planned', color: 'hsl(var(--muted))', name: 'Planned' },
-            { key: 'actual', color: 'hsl(262, 52%, 50%)', name: 'Actual' },
+            { key: 'actual', color: 'hsl(142, 60%, 35%)', name: 'Actual' },
           ]}
         />
         <ChartCard
