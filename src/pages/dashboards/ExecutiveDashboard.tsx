@@ -230,7 +230,7 @@ export const ExecutiveDashboard: React.FC = () => {
             { label: 'Finance Summary', icon: DollarSign, path: '/finance/reports' },
             { label: 'HR Overview', icon: Users, path: '/hr/employees' },
             { label: 'Field Ops', icon: MapPin, path: '/fieldops/visits' },
-            { label: 'Quality Control', icon: FlaskConical, path: '/qc/tests' },
+            // { label: 'Quality Control', icon: FlaskConical, path: '/qc/tests' },
             { label: 'Farmers', icon: Users, path: '/sales/farmers' },
             { label: 'Employees', icon: Users, path: '/hr/employees' },
             { label: 'Recruitment', icon: Users, path: '/hr/recruitment' },
