@@ -133,16 +133,16 @@ const demoUsers: Record<string, { password: string; user: User }> = {
       role: 'manufacturing_manager',
       department: 'manufacturing',
     },
-  },
-  'qc@biofactor.com': {
-    password: 'qc123',
-    user: {
-      id: '6',
-      email: 'qc@biofactor.com',
-      name: 'Dr. Meera Singh',
-      role: 'qc_analyst',
-      department: 'qc',
-    },
+  // },
+  // 'qc@biofactor.com': {
+  //   password: 'qc123',
+  //   user: {
+  //     id: '6',
+  //     email: 'qc@biofactor.com',
+  //     name: 'Dr. Meera Singh',
+  //     role: 'qc_analyst',
+  //     department: 'qc',
+  //   },
   },
   'finance@biofactor.com': {
     password: 'finance123',

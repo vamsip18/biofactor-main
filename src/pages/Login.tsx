@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth, User } from '@/contexts/AuthContext';
 import { Building2, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export const Login: React.FC = () => {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,8 +12,34 @@ export const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const getDashboardRoute = (u?: User | null) => {
+    if (!u) return '/dashboard/executive';
+    // Prefer department-based dashboards
+    switch (u.department) {
+      case 'sales':
+        return '/dashboard/sales';
+      case 'manufacturing':
+        return '/dashboard/manufacturing';
+      case 'qc':
+        return '/dashboard/qc';
+      case 'warehouse':
+        return '/dashboard/warehouse';
+      case 'finance':
+        return '/dashboard/finance';
+      case 'hr':
+        return '/dashboard/hr';
+      case 'fieldops':
+        return '/dashboard/fieldops';
+      case 'rnd':
+        return '/dashboard/rnd';
+      case 'executive':
+      default:
+        return '/dashboard/executive';
+    }
+  };
+
   if (isAuthenticated) {
-    return <Navigate to="/dashboard/executive" replace />;
+    return <Navigate to={getDashboardRoute(user)} replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,7 +50,10 @@ export const Login: React.FC = () => {
     try {
       const success = await login(email, password);
       if (success) {
-        navigate('/dashboard/executive');
+        // login stores the user in localStorage. Read it to determine route immediately.
+        const stored = localStorage.getItem('biofactor_user');
+        const loggedUser: User | null = stored ? JSON.parse(stored) : null;
+        navigate(getDashboardRoute(loggedUser));
       } else {
         setError('Invalid email or password');
       }
@@ -41,7 +70,7 @@ export const Login: React.FC = () => {
     { email: 'sales@biofactor.com', role: 'Sales Officer', password: 'sales123' },
     { email: 'warehouse@biofactor.com', role: 'Warehouse Manager', password: 'warehouse123' },
     { email: 'manufacturing@biofactor.com', role: 'Manufacturing Manager', password: 'mfg123' },
-    { email: 'qc@biofactor.com', role: 'QC Analyst', password: 'qc123' },
+    // { email: 'qc@biofactor.com', role: 'QC Analyst', password: 'qc123' },
     { email: 'finance@biofactor.com', role: 'Finance Officer', password: 'finance123' },
     { email: 'hr@biofactor.com', role: 'HR Manager', password: 'hr123' },
     { email: 'field@biofactor.com', role: 'Field Officer', password: 'field123' },
@@ -71,12 +100,12 @@ export const Login: React.FC = () => {
             </h1>
             <p className="text-lg text-primary-foreground/80 leading-relaxed">
               Streamline your agricultural business operations with our comprehensive 
-              ERP solution covering sales, manufacturing, quality control, and more.
+              ERP solution covering sales, manufacturing,  and more.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            {['Sales', 'Manufacturing', 'QC', 'Warehouse', 'Finance', 'HR', 'Field Ops', 'R&D'].map((dept) => (
+            {['Sales', 'Manufacturing', 'Warehouse', 'Finance', 'HR', 'Field Ops', 'R&D'].map((dept) => (
               <span
                 key={dept}
                 className="px-3 py-1.5 rounded-full bg-primary-foreground/10 text-sm font-medium"
