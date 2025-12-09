@@ -84,6 +84,7 @@ CREATE TABLE public.dealers (
   credit_limit DECIMAL(12, 2) DEFAULT 0,
   outstanding_balance DECIMAL(12, 2) DEFAULT 0,
   status TEXT DEFAULT 'active',
+  user_id UUID REFERENCES auth.users(id),
   created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
@@ -102,6 +103,7 @@ CREATE TABLE public.farmers (
   farm_size_acres DECIMAL(10, 2),
   crops JSONB DEFAULT '[]',
   dealer_id UUID REFERENCES public.dealers(id),
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
@@ -119,6 +121,7 @@ CREATE TABLE public.products (
   cost DECIMAL(10, 2),
   min_stock_level INTEGER DEFAULT 0,
   status TEXT DEFAULT 'active',
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
@@ -138,6 +141,7 @@ CREATE TABLE public.orders (
   net_amount DECIMAL(12, 2) DEFAULT 0,
   payment_status TEXT DEFAULT 'unpaid',
   notes TEXT,
+  user_id UUID REFERENCES auth.users(id),
   created_by UUID REFERENCES auth.users(id),
   approved_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
@@ -185,6 +189,7 @@ CREATE TABLE public.stocks (
   quantity INTEGER NOT NULL DEFAULT 0,
   expiry_date DATE,
   status TEXT DEFAULT 'available',
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
@@ -206,6 +211,7 @@ CREATE TABLE public.production_batches (
   cost_per_unit DECIMAL(10, 2),
   total_cost DECIMAL(12, 2),
   notes TEXT,
+  user_id UUID REFERENCES auth.users(id),
   created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
@@ -247,6 +253,7 @@ CREATE TABLE public.employees (
   address TEXT,
   emergency_contact TEXT,
   status TEXT DEFAULT 'active',
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
@@ -262,6 +269,7 @@ CREATE TABLE public.attendance (
   check_out TIME,
   status TEXT DEFAULT 'present',
   notes TEXT,
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
@@ -296,6 +304,7 @@ CREATE TABLE public.field_visits (
   outcome TEXT,
   issues_reported TEXT,
   photos JSONB DEFAULT '[]',
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
@@ -316,6 +325,7 @@ CREATE TABLE public.trials (
   results TEXT,
   documents JSONB DEFAULT '[]',
   status TEXT DEFAULT 'active',
+  user_id UUID REFERENCES auth.users(id),
   created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
@@ -336,6 +346,7 @@ CREATE TABLE public.invoices (
   total_amount DECIMAL(12, 2) NOT NULL,
   paid_amount DECIMAL(12, 2) DEFAULT 0,
   status TEXT DEFAULT 'unpaid',
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
@@ -351,11 +362,132 @@ CREATE TABLE public.payments (
   payment_method TEXT,
   reference_number TEXT,
   notes TEXT,
+  created_by UUID REFERENCES auth.users(id),
   received_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+
+-- Create campaigns table
+CREATE TABLE public.campaigns (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT,
+  start_date DATE,
+  end_date DATE,
+  budget DECIMAL(12, 2),
+  spent DECIMAL(12, 2) DEFAULT 0,
+  status TEXT DEFAULT 'active',
+  user_id UUID REFERENCES auth.users(id),
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+ALTER TABLE public.campaigns ENABLE ROW LEVEL SECURITY;
+
+-- Create recruitment table
+CREATE TABLE public.recruitment (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  job_title TEXT NOT NULL,
+  job_description TEXT,
+  department TEXT,
+  required_qualifications TEXT,
+  number_of_positions INTEGER DEFAULT 1,
+  status TEXT DEFAULT 'open',
+  posted_date DATE DEFAULT CURRENT_DATE,
+  closing_date DATE,
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+ALTER TABLE public.recruitment ENABLE ROW LEVEL SECURITY;
+
+-- Create demos table
+CREATE TABLE public.demos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  description TEXT,
+  product_id UUID REFERENCES public.products(id),
+  farmer_id UUID REFERENCES public.farmers(id),
+  demo_date DATE,
+  location TEXT,
+  outcome TEXT,
+  status TEXT DEFAULT 'planned',
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+ALTER TABLE public.demos ENABLE ROW LEVEL SECURITY;
+
+-- Create issues table
+CREATE TABLE public.issues (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  description TEXT,
+  farmer_id UUID REFERENCES public.farmers(id),
+  field_visit_id UUID REFERENCES public.field_visits(id),
+  issue_category TEXT,
+  severity TEXT DEFAULT 'medium',
+  status TEXT DEFAULT 'open',
+  proposed_solution TEXT,
+  resolution_date DATE,
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+ALTER TABLE public.issues ENABLE ROW LEVEL SECURITY;
+
+-- Create research table
+CREATE TABLE public.research (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  description TEXT,
+  research_type TEXT,
+  start_date DATE,
+  end_date DATE,
+  principal_investigator TEXT,
+  budget DECIMAL(12, 2),
+  status TEXT DEFAULT 'active',
+  findings TEXT,
+  publications JSONB DEFAULT '[]',
+  created_by UUID REFERENCES auth.users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+ALTER TABLE public.research ENABLE ROW LEVEL SECURITY;
+
+-- Create users table (if not using auth.users directly)
+CREATE TABLE public.users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  auth_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT UNIQUE NOT NULL,
+  full_name TEXT,
+  phone TEXT,
+  status TEXT DEFAULT 'active',
+  last_login TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+
+-- Create roles table (supplementary)
+CREATE TABLE public.roles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT UNIQUE NOT NULL,
+  description TEXT,
+  permissions JSONB DEFAULT '[]',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+ALTER TABLE public.roles ENABLE ROW LEVEL SECURITY;
 
 -- Create notifications table
 CREATE TABLE public.notifications (

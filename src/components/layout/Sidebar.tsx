@@ -67,18 +67,6 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    label: 'Quality Control',
-    path: '/dashboard/qc',
-    icon: FlaskConical,
-    department: 'qc',
-    children: [
-      { label: 'Dashboard', path: '/dashboard/qc' },
-      { label: 'Tests', path: '/qc/tests' },
-      { label: 'Batches', path: '/qc/batches' },
-      { label: 'Deviations', path: '/qc/deviations' },
-    ],
-  },
-  {
     label: 'Warehouse',
     path: '/dashboard/warehouse',
     icon: Warehouse,

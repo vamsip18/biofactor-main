@@ -51,6 +51,7 @@ import UserManagementPage from "@/pages/admin/UserManagementPage";
 import RolesPage from "@/pages/admin/RolesPage";
 import RecruitmentPage from "@/pages/hr/RecruitmentPage";
 import DemosAndIssuesPage from "@/pages/fieldops/DemosAndIssuesPage";
+import SalesReportsPage from "@/pages/sales/ReportsPage";
 
 const queryClient = new QueryClient();
 
@@ -82,7 +83,7 @@ const App = () => (
               <Route path="/sales/orders" element={<OrdersPage />} />
               <Route path="/sales/farmers" element={<FarmersPage />} />
               <Route path="/sales/campaigns" element={<CampaignsPage />} />
-              <Route path="/sales/reports" element={<SalesDashboard />} />
+              <Route path="/sales/reports" element={<SalesReportsPage />} />
               
               {/* Manufacturing */}
               <Route path="/manufacturing/batches" element={<BatchesPage />} />

@@ -1,222 +1,308 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { ChartCard } from '@/components/dashboard/ChartCard';
-import { DataTable } from '@/components/dashboard/DataTable';
-import { StatusBadge } from '@/components/dashboard/StatusBadge';
-import { useSupabaseQuery } from '@/hooks/useSupabaseQuery';
-import { Download, Filter, TrendingUp, DollarSign, Package, Users } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
-import { exportToCSV, exportToExcel, exportToPDF } from '@/lib/export';
+import React, { useState, useMemo } from 'react';
+import { ReportFilters, ReportFiltersType } from '@/components/reports/ReportFilters';
+import { KpiCards } from '@/components/reports/KpiCards';
+import { ChartPanel } from '@/components/reports/ChartPanel';
+import { ReportTable } from '@/components/reports/ReportTable';
+import { ExportControls } from '@/components/reports/ExportControls';
+import { format } from 'date-fns';
+import { FileText } from 'lucide-react';
 
-interface Order {
-  id: string;
-  order_number: string;
-  dealer_id: string;
-  order_date: string;
-  status: string;
-  net_amount: number;
-}
+// Mock data service
+const fetchReports = async (filters: ReportFiltersType) => {
+  // Simulate network delay
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
-interface Dealer {
-  id: string;
-  name: string;
-  business_name: string | null;
-  city: string | null;
-  state: string | null;
-}
+  // Generate mock data based on filters
+  const generateChartData = () => {
+    const days = [];
+    const today = new Date();
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      days.push({
+        name: format(date, 'MMM dd'),
+        revenue: Math.floor(Math.random() * 50000) + 20000,
+        orders: Math.floor(Math.random() * 50) + 10,
+        customers: Math.floor(Math.random() * 30) + 5,
+      });
+    }
+    return days;
+  };
+
+  const generateTableData = () => {
+    const regions = ['North', 'South', 'East', 'West', 'Central'];
+    const statuses = ['Completed', 'Pending', 'In Progress'];
+    const data = [];
+
+    for (let i = 0; i < 25; i++) {
+      data.push({
+        id: `report-${i}`,
+        date: format(new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000), 'dd MMM yyyy'),
+        region: regions[Math.floor(Math.random() * regions.length)],
+        dealer: `Dealer ${Math.floor(Math.random() * 100) + 1}`,
+        orders: Math.floor(Math.random() * 50) + 1,
+        revenue: Math.floor(Math.random() * 500000) + 10000,
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+        conversionRate: (Math.random() * 40 + 20).toFixed(2),
+      });
+    }
+    return data;
+  };
+
+  const chartData = generateChartData();
+  const tableData = generateTableData();
+
+  const totalRevenue = chartData.reduce((sum, d) => sum + d.revenue, 0);
+  const totalOrders = chartData.reduce((sum, d) => sum + d.orders, 0);
+  const totalCustomers = chartData.reduce((sum, d) => sum + d.customers, 0);
+  const conversionRate = (totalCustomers / totalOrders) * 100;
+
+  return {
+    kpis: {
+      totalRevenue,
+      totalRevenueChange: Math.random() > 0.5 ? Math.random() * 20 : -Math.random() * 10,
+      newCustomers: totalCustomers,
+      newCustomersChange: Math.random() > 0.5 ? Math.random() * 25 : -Math.random() * 15,
+      conversionRate,
+      conversionRateChange: Math.random() > 0.5 ? Math.random() * 5 : -Math.random() * 3,
+    },
+    chartData,
+    tableData,
+  };
+};
 
 export default function SalesReportsPage() {
-  const [dateRange, setDateRange] = useState('this_month');
-  const [fromDate, setFromDate] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
-  const [toDate, setToDate] = useState(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
+  const [filters, setFilters] = useState<ReportFiltersType>({
+    reportType: 'overview',
+    dateRange: 'month',
+    startDate: format(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
+    endDate: format(new Date(), 'yyyy-MM-dd'),
+    groupBy: 'date',
+  });
 
-  const { data: orders = [] } = useSupabaseQuery<Order>('orders');
-  const { data: dealers = [] } = useSupabaseQuery<Dealer>('dealers');
+  const [isLoading, setIsLoading] = useState(false);
+  const [reportData, setReportData] = useState<{
+    kpis: {
+      totalRevenue: number;
+      totalRevenueChange: number;
+      newCustomers: number;
+      newCustomersChange: number;
+      conversionRate: number;
+      conversionRateChange: number;
+    };
+    chartData: Array<{ name: string; revenue: number; orders: number; customers: number }>;
+    tableData: Array<{
+      id: string;
+      date: string;
+      region: string;
+      dealer: string;
+      orders: number;
+      revenue: number;
+      status: string;
+      conversionRate: string;
+    }>;
+  } | null>(null);
 
-  const handleDateRangeChange = (value: string) => {
-    setDateRange(value);
-    const now = new Date();
-    switch (value) {
-      case 'this_month':
-        setFromDate(format(startOfMonth(now), 'yyyy-MM-dd'));
-        setToDate(format(endOfMonth(now), 'yyyy-MM-dd'));
-        break;
-      case 'last_month':
-        const lastMonth = subMonths(now, 1);
-        setFromDate(format(startOfMonth(lastMonth), 'yyyy-MM-dd'));
-        setToDate(format(endOfMonth(lastMonth), 'yyyy-MM-dd'));
-        break;
-      case 'last_3_months':
-        setFromDate(format(startOfMonth(subMonths(now, 2)), 'yyyy-MM-dd'));
-        setToDate(format(endOfMonth(now), 'yyyy-MM-dd'));
-        break;
+  // Load initial data
+  React.useEffect(() => {
+    loadReports();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadReports = async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchReports(filters);
+      setReportData(data);
+    } catch (error) {
+      console.error('Error loading reports:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const filteredOrders = orders.filter(o => {
-    if (!o.order_date) return false;
-    const orderDate = new Date(o.order_date);
-    return orderDate >= new Date(fromDate) && orderDate <= new Date(toDate);
-  });
+  const handleFilterChange = async (newFilters: ReportFiltersType) => {
+    setFilters(newFilters);
+    setIsLoading(true);
+    try {
+      const data = await fetchReports(newFilters);
+      setReportData(data);
+    } catch (error) {
+      console.error('Error loading reports:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const totalRevenue = filteredOrders.reduce((sum, o) => sum + (o.net_amount || 0), 0);
-  const totalOrders = filteredOrders.length;
-  const deliveredOrders = filteredOrders.filter(o => o.status === 'delivered').length;
-  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-
-  // Monthly sales data for chart
-  const monthlyData = [
-    { month: 'Jan', revenue: 4500000, orders: 145 },
-    { month: 'Feb', revenue: 5200000, orders: 168 },
-    { month: 'Mar', revenue: 6100000, orders: 192 },
-    { month: 'Apr', revenue: 5800000, orders: 178 },
-    { month: 'May', revenue: 7200000, orders: 215 },
-    { month: 'Jun', revenue: 6800000, orders: 198 },
-  ];
-
-  // Top dealers
-  const dealerSales = dealers.map(d => {
-    const dealerOrders = filteredOrders.filter(o => o.dealer_id === d.id);
-    return {
-      ...d,
-      orderCount: dealerOrders.length,
-      totalSales: dealerOrders.reduce((sum, o) => sum + (o.net_amount || 0), 0),
+  const handleReset = () => {
+    const today = new Date();
+    const defaultFilters: ReportFiltersType = {
+      reportType: 'overview',
+      dateRange: 'month',
+      startDate: format(new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
+      endDate: format(today, 'yyyy-MM-dd'),
+      groupBy: 'date',
     };
-  }).sort((a, b) => b.totalSales - a.totalSales).slice(0, 10);
+    setFilters(defaultFilters);
+    setIsLoading(true);
+    fetchReports(defaultFilters).then((data) => {
+      setReportData(data);
+      setIsLoading(false);
+    });
+  };
 
-  const handleExport = (format: 'csv' | 'excel' | 'pdf') => {
-    const columns = [
-      { key: 'order_number' as const, label: 'Order #' },
-      { key: 'order_date' as const, label: 'Date' },
-      { key: 'status' as const, label: 'Status' },
-      { key: 'net_amount' as const, label: 'Amount' },
-    ];
-    if (format === 'csv') exportToCSV(filteredOrders, 'sales_report', columns);
-    else if (format === 'excel') exportToExcel(filteredOrders, 'sales_report', columns);
-    else exportToPDF(filteredOrders, 'sales_report', columns, 'Sales Report');
+  const handleExportCSV = () => {
+    if (!reportData?.tableData) return;
+
+    const headers = ['Date', 'Region', 'Dealer', 'Orders', 'Revenue', 'Status', 'Conversion Rate'];
+    const csv = [
+      headers.join(','),
+      ...reportData.tableData.map((row: typeof reportData.tableData[0]) =>
+        [row.date, row.region, row.dealer, row.orders, row.revenue, row.status, row.conversionRate].join(',')
+      ),
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sales-report-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleExportPDF = () => {
+    // Simple print-to-PDF using browser print dialog
+    window.print();
+  };
+
+  const getChartTitle = () => {
+    const titles: Record<string, string> = {
+      overview: 'Revenue & Orders Trend',
+      regional: 'Regional Performance',
+      dealer: 'Dealer Performance',
+      product: 'Product Sales Trend',
+      conversion: 'Conversion Metrics Trend',
+      customer: 'Customer Growth',
+    };
+    return titles[filters.reportType] || 'Report Chart';
+  };
+
+  const getTableTitle = () => {
+    const titles: Record<string, string> = {
+      overview: 'Sales Summary',
+      regional: 'Regional Details',
+      dealer: 'Dealer Details',
+      product: 'Product Sales Details',
+      conversion: 'Conversion Details',
+      customer: 'Customer Details',
+    };
+    return titles[filters.reportType] || 'Report Details';
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Sales Reports</h1>
-          <p className="text-muted-foreground mt-1">Analyze sales performance and trends</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Select value={dateRange} onValueChange={handleDateRangeChange}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="this_month">This Month</SelectItem>
-              <SelectItem value="last_month">Last Month</SelectItem>
-              <SelectItem value="last_3_months">Last 3 Months</SelectItem>
-              <SelectItem value="custom">Custom Range</SelectItem>
-            </SelectContent>
-          </Select>
-          {dateRange === 'custom' && (
-            <>
-              <Input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="w-36" />
-              <span className="text-muted-foreground">to</span>
-              <Input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="w-36" />
-            </>
-          )}
-          <Button variant="outline" onClick={() => handleExport('excel')}>
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </Button>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-primary/5 to-primary/10 border-b border-border px-6 py-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-3 mb-2">
+            <FileText className="w-8 h-8 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">Sales & Marketing Reports</h1>
+          </div>
+          <p className="text-muted-foreground">Analyze sales performance and marketing metrics</p>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Revenue</p>
-                <p className="text-2xl font-bold">₹{(totalRevenue / 100000).toFixed(2)}L</p>
-              </div>
-              <DollarSign className="w-8 h-8 text-success opacity-50" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Orders</p>
-                <p className="text-2xl font-bold">{totalOrders}</p>
-              </div>
-              <Package className="w-8 h-8 text-info opacity-50" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Delivered Orders</p>
-                <p className="text-2xl font-bold">{deliveredOrders}</p>
-              </div>
-              <TrendingUp className="w-8 h-8 text-success opacity-50" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Avg Order Value</p>
-                <p className="text-2xl font-bold">₹{avgOrderValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
-              </div>
-              <Users className="w-8 h-8 text-warning opacity-50" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left Sidebar - Filters */}
+          <div className="lg:col-span-1">
+            <ReportFilters
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onReset={handleReset}
+              isLoading={isLoading}
+            />
+          </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartCard
-          title="Monthly Revenue Trend"
-          subtitle="Revenue in Lakhs"
-          type="area"
-          data={monthlyData}
-          xAxisKey="month"
-          dataKeys={[{ key: 'revenue', color: 'hsl(var(--success))', name: 'Revenue' }]}
-        />
-        <ChartCard
-          title="Order Volume"
-          subtitle="Number of orders per month"
-          type="bar"
-          data={monthlyData}
-          xAxisKey="month"
-          dataKeys={[{ key: 'orders', color: 'hsl(var(--info))', name: 'Orders' }]}
-        />
-      </div>
+          {/* Right Content Area */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* KPI Cards */}
+            <KpiCards
+              data={reportData?.kpis || {
+                totalRevenue: 0,
+                newCustomers: 0,
+                conversionRate: 0,
+              }}
+              isLoading={isLoading}
+            />
 
-      {/* Top Dealers Table */}
-      <DataTable
-        title="Top Dealers by Sales"
-        data={dealerSales}
-        columns={[
-          { key: 'name', label: 'Dealer Name', sortable: true },
-          { key: 'business_name', label: 'Business', sortable: true, render: (v) => v || '-' },
-          { key: 'city', label: 'City', sortable: true },
-          { key: 'orderCount', label: 'Orders', sortable: true },
-          {
-            key: 'totalSales',
-            label: 'Total Sales',
-            sortable: true,
-            render: (v) => `₹${(v / 1000).toFixed(1)}K`,
-          },
-        ]}
-      />
+            {/* Export Controls */}
+            <div className="flex justify-end">
+              <ExportControls
+                onExportCSV={handleExportCSV}
+                onExportPDF={handleExportPDF}
+                isLoading={isLoading}
+                disabled={!reportData?.tableData || reportData.tableData.length === 0}
+              />
+            </div>
+
+            {/* Chart */}
+            <ChartPanel
+              title={getChartTitle()}
+              data={reportData?.chartData || []}
+              chartType={filters.reportType === 'regional' ? 'bar' : 'area'}
+              dataKeys={['revenue', 'orders']}
+              colors={['hsl(142, 60%, 35%)', 'hsl(199, 89%, 48%)']}
+              isLoading={isLoading}
+              height={400}
+            />
+
+            {/* Table */}
+            <ReportTable
+              title={getTableTitle()}
+              columns={[
+                { key: 'date', label: 'Date' },
+                { key: 'region', label: 'Region' },
+                { key: 'dealer', label: 'Dealer' },
+                { key: 'orders', label: 'Orders' },
+                {
+                  key: 'revenue',
+                  label: 'Revenue',
+                  render: (value) => `₹${(value || 0).toLocaleString('en-IN')}`,
+                },
+                {
+                  key: 'status',
+                  label: 'Status',
+                  render: (value) => {
+                    const statusClasses: Record<string, string> = {
+                      'Completed': 'bg-success/10 text-success',
+                      'Pending': 'bg-warning/10 text-warning',
+                      'In Progress': 'bg-info/10 text-info',
+                    };
+                    return (
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusClasses[value] || 'bg-muted text-muted-foreground'}`}
+                      >
+                        {value}
+                      </span>
+                    );
+                  },
+                },
+                {
+                  key: 'conversionRate',
+                  label: 'Conversion Rate',
+                  render: (value) => `${value}%`,
+                },
+              ]}
+              data={reportData?.tableData || []}
+              isLoading={isLoading}
+              emptyMessage="No report data available. Try adjusting your filters."
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
